@@ -1,0 +1,36 @@
+CREATE OR REPLACE TYPE predicate_type AS OBJECT (
+    attribute_name VARCHAR2(100),
+    attribute_value VARCHAR2(100)
+);
+/
+
+CREATE OR REPLACE TYPE predicate_list AS TABLE OF predicate_type;
+/
+
+CREATE OR REPLACE TYPE miniterm_type AS OBJECT (
+    attribute_name VARCHAR2(100),
+    attribute_value VARCHAR2(100)
+);
+/
+
+CREATE OR REPLACE TYPE miniterm_list AS TABLE OF miniterm_type;
+/
+
+CREATE OR REPLACE PACKAGE MinitermGeneratorPackage AS
+    FUNCTION generate_horizontal_miniterms(predicates IN predicate_list) RETURN miniterm_list PIPELINED;
+END MinitermGeneratorPackage;
+/
+
+CREATE OR REPLACE PACKAGE BODY MinitermGeneratorPackage AS
+    FUNCTION generate_horizontal_miniterms(predicates IN predicate_list) RETURN miniterm_list PIPELINED IS
+        miniterm miniterm_type;
+    BEGIN
+        FOR i IN 1..predicates.COUNT LOOP
+            FOR j IN 1..predicates(i).attribute_name.COUNT LOOP
+                PIPE ROW (miniterm_type(predicates(i).attribute_name(j), predicates(i).attribute_value(j)));
+            END LOOP;
+        END LOOP;
+        RETURN;
+    END generate_horizontal_miniterms;
+END MinitermGeneratorPackage;
+/
